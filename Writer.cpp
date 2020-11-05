@@ -1,31 +1,100 @@
 #include <iostream>
+#include "thread.h"
+#include "SharedObject.h"
+#include <iostream>
+#include <unistd.h>
+#include <stdio.h>
+#include <fstream>
+#include <signal.h>
+#include <time.h>
+#include <sstream> 
 
-/*
+using namespace std;
+
+
+
 struct MyShared{
-	...;
-};*/
+	int threadIdShared;
+	int reportIdShared;
+	int delayShared;
+	bool running;
+};
+
+
+class WriterThread : public Thread{
+	public:
+		int threadId;
+		int reportId = 0;
+		int delay;
+		bool	flag;
+		
+		WriterThread(int del, int tID):Thread(8*1000){
+			this->delay = del;
+			this->threadId = tID;
+		}
+
+		virtual long ThreadMain(void) override{
+			
+			//declare shared memory var so this thread can access it
+			Shared<MyShared> sharedMemory ("sharedMemory");
+			while(true)
+			{
+				sharedMemory->threadIdShared = threadId; 
+				sharedMemory->reportIdShared = reportId++; 
+				reportId ++; 
+				sharedMemory->delayShared = delay;
+				sleep(delay);
+				
+				
+				if(flag){//Exit loop to end the thread
+					break;
+				}
+			}
+		}
+};
 
 int main(void)
 {
-	std::cout << "I am a Writer" << std::endl;
+	cout << "I am a Writer" << endl;
+
+	string ans;
+	string delay;
+	int delayInt;
+	int tID = 0;
+
+	WriterThread * thread;
+
 	
-	////////////////////////////////////////////////////////////////////////
-	// This is a possible starting point for using threads and shared memory. 
-	// You do not have to start with this
-	////////////////////////////////////////////////////////////////////////
-	/*...
+	
 	Shared<MyShared> shared("sharedMemory", true); //This is the owner of sharedMamory
-	...
+	shared ->running = true;
+	
 	while(true){
-		...
-		//create thread using user input
-		thread1 = new WriterThread(xyz); //add arguments as needed
-		...
+		
+		cout << "want a new thread? y or n?" << endl;
+
+		getline(cin, ans);
+
+     	if(ans == "y"){
+
+		cout << "enter the delay for the thread" << endl;
+		getline(cin, delay);
+
+		istringstream(delay) >> delayInt; 
+
+		thread = new WriterThread(delayInt,tID++); //add arguments as needed
+		cout << "thread "+ to_string(tID) << endl;
+
+	 }
+	 else{
+		 break;
+	 }
+		
 	}
 	//example for one thread thread1
-	thread1->flag= true;
-	delete thread1;
-	*/
+	// thread1->flag= true;
+	// delete thread1;
+	
 }
 
 
@@ -33,27 +102,5 @@ int main(void)
 // This is a possible starting point for using threads and shared memory. 
 // You do not have to start with this
 ////////////////////////////////////////////////////////////////////////
-/*class WriterThread : public Thread{
-	public:
-		int 	threadNum;
-		bool	flag;
-		
-		WriterThread(int in):Thread(8*1000){
-			this->threadNum = in; //or whatever you want/need here
-		}
 
-		virtual long ThreadMain(void) override{
-			...
-			//declare shared memory var so this thread can access it
-			Shared<MyShared> sharedMemory ("sharedMemory");
-			while(true)
-			{
-				//write to shared memory
-				...  
-				if(flag){//Exit loop to end the thread
-					break;
-				}
-			}
-		}
-};
-*/
+

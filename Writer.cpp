@@ -12,8 +12,6 @@
 
 using namespace std;
 
-
-
 struct MyShared{
 	int threadIdShared;
 	int reportIdShared;
@@ -46,6 +44,7 @@ class WriterThread : public Thread{
 			while(true)
 			{
 				wSem.Wait();
+
 				sharedMemory->threadIdShared = threadId; 
 				sharedMemory->reportIdShared = ++reportId; 
 				sharedMemory->delayShared = delay;
@@ -120,3 +119,12 @@ int main(void)
 ////////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+
+
+
+
+// by Zayyed Mansoor

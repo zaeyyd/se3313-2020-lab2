@@ -40,8 +40,7 @@ class WriterThread : public Thread{
 			while(true)
 			{
 				sharedMemory->threadIdShared = threadId; 
-				sharedMemory->reportIdShared = reportId++; 
-				reportId ++; 
+				sharedMemory->reportIdShared = ++reportId; 
 				sharedMemory->delayShared = delay;
 				sleep(delay);
 				
@@ -82,7 +81,7 @@ int main(void)
 
 		istringstream(delay) >> delayInt; 
 
-		thread = new WriterThread(delayInt,tID++); //add arguments as needed
+		thread = new WriterThread(delayInt,++tID); //add arguments as needed
 		cout << "thread "+ to_string(tID) << endl;
 
 	 }
@@ -91,10 +90,10 @@ int main(void)
 	 }
 		
 	}
-	//example for one thread thread1
-	// thread1->flag= true;
-	// delete thread1;
+	thread->flag= true;
+	delete thread;
 	
+	return 0;
 }
 
 

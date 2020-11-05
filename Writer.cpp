@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <time.h>
 #include <sstream> 
+#include "Semaphore.h"
 
 using namespace std;
 
@@ -37,14 +38,22 @@ class WriterThread : public Thread{
 			
 			//declare shared memory var so this thread can access it
 			Shared<MyShared> sharedMemory ("sharedMemory");
+
+			Semaphore wSem("writerSemaphore");
+
+			Semaphore rSem("readerSemaphore");
+
 			while(true)
 			{
+				wSem.Wait();
 				sharedMemory->threadIdShared = threadId; 
-				sharedMemory->reportIdShared = reportId++; 
-				reportId ++; 
+				sharedMemory->reportIdShared = ++reportId; 
 				sharedMemory->delayShared = delay;
-				sleep(delay);
 				
+				wSem.Signal();
+				rSem.Signal();
+
+				sleep(delay);
 				
 				if(flag){//Exit loop to end the thread
 					break;
@@ -55,12 +64,17 @@ class WriterThread : public Thread{
 
 int main(void)
 {
+
+	
 	cout << "I am a Writer" << endl;
 
 	string ans;
 	string delay;
 	int delayInt;
 	int tID = 0;
+
+	Semaphore writeSem("writerSemaphore", 1, true); 
+	Semaphore readSem("readerSemaphore", 0, true); 
 
 	WriterThread * thread;
 
@@ -82,7 +96,7 @@ int main(void)
 
 		istringstream(delay) >> delayInt; 
 
-		thread = new WriterThread(delayInt,tID++); //add arguments as needed
+		thread = new WriterThread(delayInt,++tID); //add arguments as needed
 		cout << "thread "+ to_string(tID) << endl;
 
 	 }
@@ -91,9 +105,11 @@ int main(void)
 	 }
 		
 	}
-	//example for one thread thread1
-	// thread1->flag= true;
-	// delete thread1;
+
+	thread->flag= true;
+	delete thread;
+
+	return 0;
 	
 }
 
